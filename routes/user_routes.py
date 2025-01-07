@@ -31,7 +31,7 @@ def create_users(
     try:
         user_valid = validate_email(email,db)
         if user_valid == True:
-            return {"message":"El correo ingresado ya se encutra registrado"}
+            return {"message":"El correo ingresado ya se encuentra registrado"}
         elif user_valid == False:
             user_data = create_user(
                 user_name=name,
@@ -48,6 +48,6 @@ def create_users(
 def render_logout(request:Request):
     """
     # Formulario de registro usuario
-    Renderiza el formulario de html para que el usuario pudea ingresar sus datos
+    Carga el formulario de html para que el usuario puede ingresar sus datos
     """
     return template.TemplateResponse("pages/user_logout.html",{"request":request})

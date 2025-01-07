@@ -1,6 +1,6 @@
 from database.db import SessionLocal,Base,engine
 from database.models import book,user
-#Fabrica de sessiones
+#Fabrica de sesiones
 def get_db():
     try:
         db = SessionLocal()
