@@ -1,7 +1,8 @@
 from fastapi import APIRouter, Depends,Form
 from fastapi.requests import Request
-from fastapi.responses import HTMLResponse 
-from fastapi.templating import Jinja2Templates 
+from fastapi.responses import HTMLResponse
+from starlette.responses import RedirectResponse
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session 
 from database.utils import get_db
 from services.users_services import create_user,validate_email
@@ -10,7 +11,7 @@ route = APIRouter(prefix="/user")
 
 template = Jinja2Templates("templates")
 
-@route.post("/create/")
+@route.post("/create/",response_class=RedirectResponse)
 def create_users(
     name:str = Form(...),
     email:str = Form(...),
@@ -38,7 +39,7 @@ def create_users(
                 user_password=password,
                 db=db
             )
-            return user_data
+            return RedirectResponse("/user/login",status_code=303)
         return {}
     except Exception as e: 
         print("A ocurrido un error inesperado: ", e)
