@@ -28,3 +28,11 @@ def validate_user(email:str,password:str,db:Session)-> bool:
     if user:
         hashed_password = user.password
         return validate_password(password,hashed_password)
+
+# Valida si el corre esta registrado
+def validate_email(email:str,db:Session):
+    user = db.query(UserModel).filter(UserModel.email == email).first()
+    if user: 
+        return True
+    else:
+        return False
