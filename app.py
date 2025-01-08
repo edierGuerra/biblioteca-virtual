@@ -1,10 +1,10 @@
 #from database.utils import create_db
-from fastapi import FastAPI
+from fastapi import FastAPI,Depends
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 from fastapi.requests import Request
 from routes.user_routes import route as user_router
-from database.utils  import create_db 
+from security.tokens import decode_access_token
 
 templates = Jinja2Templates("templates") #Plantillas del proyecto
 
@@ -23,8 +23,16 @@ async def index_page(request:Request):
 
 #Renderiza la pagina principal 
 @app.get("/home",tags=["pages"],response_class=HTMLResponse,summary="Pagina principal",description="Renderiza la pagina principal que se le muestra a los usuarios registrados.")
-async def home_page(request:Request):
-    return templates.TemplateResponse("home.html",{"request":request})
+async def home_page(request:Request,token:str = Depends(decode_access_token)):
+    if token != None:
+        return templates.TemplateResponse("home.html",{"request":request})
+    elif token == None:
+        return {
+            "error":{
+            "message":"No tienes acceso",
+            "code":"501"
+            }
+        }
 
 # Rutas del proyecto
 app.include_router(user_router)
