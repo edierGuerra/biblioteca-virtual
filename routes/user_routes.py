@@ -32,7 +32,7 @@ def create_users(
     try:
         user_valid = validate_email(email,db)
         if user_valid == True:
-            return {"message":"El correo ingresado ya se encuentra registrado"}
+            raise HTTPException(401,detail="El correo ya se encuentra registrado")
         elif user_valid == False:
             user_data = create_user(
                 user_name=name,
@@ -41,9 +41,11 @@ def create_users(
                 db=db
             )
             return RedirectResponse("/user/login",status_code=303)
-        return {}
-    except Exception as e: 
-        print("A ocurrido un error inesperado: ", e)
+    except HTTPException as e: 
+        raise e
+    except Exception as ex:
+        raise HTTPException(505,detail="Error inesperado")
+
 
 @route.get("/logout",response_class=HTMLResponse)
 def render_logout(request:Request):
@@ -59,8 +61,7 @@ def login_user(email:str = Form(...),password:str = Form(...),db:Session = Depen
     if valide:
         access_token = create_token(data={"sub":email},expires_delta=30)
         return RedirectResponse(url=f"/home?token={access_token}",status_code=303)
-    elif valide == False:
-        raise HTTPException(401,detail="usuario o contraseña incorrecto.")
+    raise HTTPException(401,detail="Usuario o contraseña incorrectos.")
 
 @route.get("/login",response_class=HTMLResponse)
 def render_login(request:Request):
