@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends,Form
+from fastapi import APIRouter, Depends,Form,HTTPException
 from fastapi.requests import Request
 from fastapi.responses import HTMLResponse
 from starlette.responses import RedirectResponse
@@ -54,11 +54,14 @@ def render_logout(request:Request):
     return template.TemplateResponse("pages/user_logout.html",{"request":request})
 
 @route.post("/login/",response_class=RedirectResponse)
-def login_user(email:str,password:str,db:Session = Depends(get_db)):
-    if validate_user(email,password,db):
+def login_user(email:str = Form(...),password:str = Form(...),db:Session = Depends(get_db),status_login:bool = False):
+    valide = validate_user(email,password,db)
+    if valide:
         access_token = create_token(data={"sub":email},expires_delta=30)
         return RedirectResponse(url=f"/home?token={access_token}",status_code=303)
+    elif valide == False:
+        raise HTTPException(401,detail="usuario o contraseña incorrecto.")
 
-@route.post("/login",response_class=HTMLResponse)
+@route.get("/login",response_class=HTMLResponse)
 def render_login(request:Request):
     return template.TemplateResponse("pages/user_login.html",{"request":request})
