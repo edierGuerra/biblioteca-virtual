@@ -5,7 +5,8 @@ from starlette.responses import RedirectResponse
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.orm import Session 
 from database.utils import get_db
-from services.users_services import create_user,validate_email
+from security.tokens import create_token
+from services.users_services import create_user,validate_email,validate_user
 
 route = APIRouter(prefix="/user")
 
@@ -51,3 +52,13 @@ def render_logout(request:Request):
     Carga el formulario de html para que el usuario puede ingresar sus datos
     """
     return template.TemplateResponse("pages/user_logout.html",{"request":request})
+
+@route.post("/login/",response_class=RedirectResponse)
+def login_user(email:str,password:str,db:Session = Depends(get_db)):
+    if validate_user(email,password,db):
+        access_token = create_token(data={"sub":email},expires_delta=30)
+        return RedirectResponse(url=f"/home?token={access_token}",status_code=303)
+
+@route.post("/login",response_class=HTMLResponse)
+def render_login(request:Request):
+    return template.TemplateResponse("pages/user_login.html",{"request":request})
